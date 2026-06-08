@@ -1,12 +1,8 @@
 import streamlit as st
-import huggingface_hub
-
-st.write("Hugging Face Hub Version:")
-st.write(huggingface_hub.__version__)
 from graph import run_story_narrator
 
 st.set_page_config(
-    page_title="AI Story Narrator V2",
+    page_title="AI Story Narrator V3",
     page_icon="🎙️",
     layout="wide"
 )
@@ -14,8 +10,8 @@ st.set_page_config(
 if "history" not in st.session_state:
     st.session_state.history = []
 
-st.title("🎙️ AI Story Narrator V2")
-st.caption("Create stories and listen to AI narration")
+st.title("🎙️ AI Story Narrator V3")
+st.caption("Create stories, cover images and audio narration")
 
 with st.sidebar:
 
@@ -53,26 +49,27 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("📚 Story History")
+    st.header("📚 Recent Stories")
 
     if len(st.session_state.history) == 0:
         st.write("No stories generated yet")
 
-    for item in reversed(st.session_state.history[-5:]):
-        st.write("• " + item)
+    else:
+        for item in reversed(st.session_state.history[-5:]):
+            st.write(f"• {item}")
 
 topic = st.text_input(
     "Enter Story Topic",
     placeholder="A boy who started a billion-dollar company"
 )
 
-generate = st.button("Generate Story & Audio")
+generate = st.button("🚀 Generate Story & Audio")
 
 if generate:
 
     if topic:
 
-        with st.spinner("Generating..."):
+        with st.spinner("Generating story, cover image and audio..."):
 
             result = run_story_narrator(
                 topic,
@@ -83,30 +80,48 @@ if generate:
 
         st.session_state.history.append(topic)
 
-        st.success("Story generated successfully")
+        st.success("Story generated successfully!")
 
+        # Cover Image
+        if result.get("image_file"):
+
+            st.subheader("🖼️ Story Cover")
+
+            st.image(
+                result["image_file"],
+                use_container_width=True
+            )
+
+        # Story
         st.subheader("📖 Generated Story")
 
         st.write(result["story"])
 
-        with open(result["audio_file"], "rb") as audio_file:
+        # Audio
+        if result.get("audio_file"):
 
-            audio_bytes = audio_file.read()
+            with open(result["audio_file"], "rb") as audio_file:
 
-        st.subheader("🎧 Audio Narration")
+                audio_bytes = audio_file.read()
 
-        st.audio(
-            audio_bytes,
-            format="audio/mp3"
-        )
+            st.subheader("🎧 Audio Narration")
 
-        st.download_button(
-            label="⬇️ Download Audio",
-            data=audio_bytes,
-            file_name="story.mp3",
-            mime="audio/mpeg"
-        )
+            st.audio(
+                audio_bytes,
+                format="audio/mp3"
+            )
+
+            st.download_button(
+                label="⬇️ Download Audio",
+                data=audio_bytes,
+                file_name="story.mp3",
+                mime="audio/mpeg"
+            )
 
     else:
 
         st.warning("Please enter a story topic.")
+
+st.divider()
+
+st.caption("Built with ❤️ by The Rising Icons")
