@@ -24,15 +24,18 @@ Write an engaging short story in 250 words about:
 {state['topic']}
 """
 
+    try:
     response = client.chat.completions.create(
-    model="meta-llama/Llama-3.1-8B-Instruct",
-    messages=[
-        {
-            "role": "user",
-            "content": prompt
-        }
-    ]
-)
+        model="meta-llama/Llama-3.1-8B-Instruct",
+        messages=[
+            {
+                "role": "user",
+                "content": prompt
+            }
+        ]
+    )
+except Exception as e:
+    raise Exception(f"Hugging Face Error: {str(e)}")
 
     story = response.choices[0].message.content
 
