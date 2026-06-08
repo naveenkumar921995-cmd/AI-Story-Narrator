@@ -29,14 +29,18 @@ if st.button("Generate Story & Audio"):
             if result["audio_file"]:
 
                 st.subheader("Audio Narration")
-                st.audio(result["audio_file"])
 
-                with open(result["audio_file"], "rb") as file:
-                    st.download_button(
-                        "Download Audio",
-                        file,
-                        file_name="story.wav"
-                    )
+                with open(result["audio_file"], "rb") as audio_file:
+                    audio_bytes = audio_file.read()
+
+                st.audio(audio_bytes, format="audio/mp3")
+
+                st.download_button(
+                    label="Download Audio",
+                    data=audio_bytes,
+                    file_name="story.mp3",
+                    mime="audio/mpeg"
+                )
 
     else:
         st.warning("Please enter a topic.")
