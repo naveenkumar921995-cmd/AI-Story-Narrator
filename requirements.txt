@@ -2,3 +2,4 @@ streamlit
 langgraph
 huggingface_hub
 gtts
+Pillow
