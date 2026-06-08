@@ -2,6 +2,7 @@ import streamlit as st
 from typing import TypedDict
 from langgraph.graph import StateGraph, END
 from huggingface_hub import InferenceClient
+from gtts import gTTS
 
 HF_TOKEN = st.secrets["HF_TOKEN"]
 
@@ -48,9 +49,19 @@ Write an engaging short story in about 250 words on:
 
 def generate_audio(state):
 
+    output_file = "story.mp3"
+
+    tts = gTTS(
+        text=state["story"],
+        lang="en",
+        slow=False
+    )
+
+    tts.save(output_file)
+
     return {
         **state,
-        "audio_file": ""
+        "audio_file": output_file
     }
 
 
