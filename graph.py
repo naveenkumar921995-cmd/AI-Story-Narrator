@@ -1,4 +1,3 @@
-import os
 import streamlit as st
 from typing import TypedDict
 from langgraph.graph import StateGraph, END
@@ -7,7 +6,6 @@ from huggingface_hub import InferenceClient
 HF_TOKEN = st.secrets["HF_TOKEN"]
 
 client = InferenceClient(
-    provider="hf-inference",
     api_key=HF_TOKEN
 )
 
@@ -19,25 +17,28 @@ class StoryState(TypedDict):
 
 
 def generate_story(state):
+
     prompt = f"""
-Write an engaging short story in 250 words about:
+Write an engaging short story in about 250 words on:
 {state['topic']}
 """
 
     try:
-    response = client.chat.completions.create(
-        model="meta-llama/Llama-3.1-8B-Instruct",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
-except Exception as e:
-    raise Exception(f"Hugging Face Error: {str(e)}")
+        response = client.chat.completions.create(
+            model="meta-llama/Llama-3.1-8B-Instruct",
+            messages=[
+                {
+                    "role": "user",
+                    "content": prompt
+                }
+            ],
+            max_tokens=400
+        )
 
-    story = response.choices[0].message.content
+        story = response.choices[0].message.content
+
+    except Exception as e:
+        story = f"Error from Hugging Face: {str(e)}"
 
     return {
         **state,
@@ -47,19 +48,9 @@ except Exception as e:
 
 def generate_audio(state):
 
-    audio = client.text_to_speech(
-        state["story"],
-        model="espnet/kan-bayashi_ljspeech_vits"
-    )
-
-    output_file = "story.wav"
-
-    with open(output_file, "wb") as f:
-        f.write(audio)
-
     return {
         **state,
-        "audio_file": output_file
+        "audio_file": ""
     }
 
 
@@ -77,6 +68,7 @@ graph = builder.compile()
 
 
 def run_story_narrator(topic):
+
     return graph.invoke(
         {
             "topic": topic
