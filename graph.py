@@ -24,14 +24,14 @@ Write an engaging short story in 250 words about:
 """
 
     response = client.chat.completions.create(
-        model="Qwen/Qwen3-32B",
-        messages=[
-            {
-                "role": "user",
-                "content": prompt
-            }
-        ]
-    )
+    model="meta-llama/Llama-3.1-8B-Instruct",
+    messages=[
+        {
+            "role": "user",
+            "content": prompt
+        }
+    ]
+)
 
     story = response.choices[0].message.content
 
