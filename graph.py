@@ -1,9 +1,10 @@
 import os
+import streamlit as st
 from typing import TypedDict
 from langgraph.graph import StateGraph, END
 from huggingface_hub import InferenceClient
 
-HF_TOKEN = os.environ["HF_TOKEN"]
+HF_TOKEN = st.secrets["HF_TOKEN"]
 
 client = InferenceClient(
     provider="hf-inference",
