@@ -87,10 +87,13 @@ if generate:
 
             st.subheader("🖼️ Story Cover")
 
-            st.image(
-                result["image_file"],
-                use_container_width=True
-            )
+col1, col2, col3 = st.columns([1,2,1])
+
+with col2:
+    st.image(
+        result["image_file"],
+        width=350
+    )
 
         # Story
         st.subheader("📖 Generated Story")
