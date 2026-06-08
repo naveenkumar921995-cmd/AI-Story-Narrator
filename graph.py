@@ -3,7 +3,6 @@ from typing import TypedDict
 from langgraph.graph import StateGraph, END
 from huggingface_hub import InferenceClient
 from gtts import gTTS
-from PIL import Image, ImageDraw
 
 HF_TOKEN = st.secrets["HF_TOKEN"]
 
@@ -48,14 +47,15 @@ def generate_story(state):
     else:
 
         prompt = f"""
-Write a {state['category']} story.
+Write a compelling {state['category']} story.
 
 Topic: {state['topic']}
 
 Requirements:
 - Approximately {words} words
 - Clear beginning, challenge and ending
-- Write entirely in English
+- Inspirational and engaging
+- Entirely in English
 """
 
     try:
@@ -85,98 +85,81 @@ Requirements:
 
 def generate_cover_image(state):
 
-    width = 800
-    height = 1000
+    try:
 
-    image = Image.new(
-        "RGB",
-        (width, height),
-        color=(15, 23, 42)
-    )
+        prompt = f"""
+Professional book cover illustration.
 
-    draw = ImageDraw.Draw(image)
+Topic: {state['topic']}
 
-    # Top banner
-    draw.rectangle(
-        [(0, 0), (width, 120)],
-        fill=(37, 99, 235)
-    )
+Category: {state['category']}
 
-    # Category banner
-    draw.rectangle(
-        [(150, 350), (650, 430)],
-        fill=(245, 158, 11)
-    )
+Highly detailed.
+Inspirational.
+Cinematic lighting.
+Professional digital art.
+Book cover composition.
+Magazine quality.
+Ultra realistic.
+No text.
+"""
 
-    # Bottom banner
-    draw.rectangle(
-        [(0, 900), (width, 1000)],
-        fill=(37, 99, 235)
-    )
+        image = client.text_to_image(
+            prompt=prompt,
+            model="black-forest-labs/FLUX.1-schnell"
+        )
 
-    title = state["topic"].upper()
-    category = state["category"].upper()
+        image_path = "cover.png"
 
-    draw.text(
-        (180, 40),
-        "THE RISING ICONS",
-        fill="white"
-    )
+        image.save(image_path)
 
-    draw.text(
-        (80, 220),
-        title,
-        fill="white"
-    )
+        return {
+            **state,
+            "image_file": image_path
+        }
 
-    draw.text(
-        (220, 375),
-        f"{category} STORY",
-        fill="black"
-    )
+    except Exception as e:
 
-    draw.text(
-        (150, 600),
-        "Inspiration • Growth • Success",
-        fill=(255, 215, 0)
-    )
+        print(f"Image generation error: {e}")
 
-    draw.text(
-        (220, 940),
-        "AI STORY NARRATOR",
-        fill="white"
-    )
+        return {
+            **state,
+            "image_file": None
+        }
 
-    image_path = "cover.png"
-
-    image.save(image_path)
-
-    return {
-        **state,
-        "image_file": image_path
-    }
 
 def generate_audio(state):
 
-    lang_code = "en"
+    try:
 
-    if state["language"] == "Hindi":
-        lang_code = "hi"
+        lang_code = "en"
 
-    output_file = "story.mp3"
+        if state["language"] == "Hindi":
+            lang_code = "hi"
 
-    tts = gTTS(
-        text=state["story"],
-        lang=lang_code,
-        slow=False
-    )
+        output_file = "story.mp3"
 
-    tts.save(output_file)
+        tts = gTTS(
+            text=state["story"],
+            lang=lang_code,
+            slow=False
+        )
 
-    return {
-        **state,
-        "audio_file": output_file
-    }
+        tts.save(output_file)
+
+        return {
+            **state,
+            "audio_file": output_file
+        }
+
+    except Exception as e:
+
+        print(f"Audio error: {e}")
+
+        return {
+            **state,
+            "audio_file": None
+        }
 
 
 builder = StateGraph(StoryState)
