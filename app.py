@@ -1,26 +1,8 @@
-from huggingface_hub import InferenceClient
-import streamlit as st
-
-client = InferenceClient(
-    api_key=st.secrets["HF_TOKEN"]
-)
-
-try:
-    image = client.text_to_image(
-        "A professional portrait of a successful entrepreneur, cinematic lighting",
-        model="black-forest-labs/FLUX.1-schnell"
-    )
-
-    image.save("test_image.png")
-    st.image("test_image.png")
-
-except Exception as e:
-    st.error(str(e))
 import streamlit as st
 from graph import run_story_narrator
 
 st.set_page_config(
-    page_title="AI Story Narrator V3",
+    page_title="AI Story Narrator",
     page_icon="🎙️",
     layout="wide"
 )
@@ -28,15 +10,15 @@ st.set_page_config(
 if "history" not in st.session_state:
     st.session_state.history = []
 
-st.title("🎙️ AI Story Narrator V3")
-st.caption("Create stories, cover images and audio narration")
+st.title("🎙️ AI Story Narrator")
+st.caption("The Rising Icons")
 
 with st.sidebar:
 
-    st.header("⚙️ Story Settings")
+    st.header("Story Settings")
 
     category = st.selectbox(
-        "Story Category",
+        "Category",
         [
             "Entrepreneur",
             "Motivational",
@@ -44,12 +26,12 @@ with st.sidebar:
             "Fantasy",
             "Sci-Fi",
             "Historical",
-            "Kids Story"
+            "Kids"
         ]
     )
 
     length = st.selectbox(
-        "Story Length",
+        "Length",
         [
             "Short",
             "Medium",
@@ -58,7 +40,7 @@ with st.sidebar:
     )
 
     language = st.selectbox(
-        "Narration Language",
+        "Language",
         [
             "English",
             "Hindi"
@@ -67,26 +49,25 @@ with st.sidebar:
 
     st.divider()
 
-    st.header("📚 Recent Stories")
+    st.subheader("Recent Stories")
 
-    if len(st.session_state.history) == 0:
-        st.write("No stories generated yet")
-    else:
+    if st.session_state.history:
+
         for item in reversed(st.session_state.history[-5:]):
             st.write(f"• {item}")
 
 topic = st.text_input(
     "Enter Story Topic",
-    placeholder="A boy who started a billion-dollar company"
+    placeholder="Ratan Tata Success Story"
 )
 
-generate = st.button("🚀 Generate Story & Audio")
-
-if generate:
+if st.button("Generate Story & Audio"):
 
     if topic:
 
-        with st.spinner("Generating story, cover image and audio..."):
+        with st.spinner(
+            "Generating story, AI cover image and audio..."
+        ):
 
             result = run_story_narrator(
                 topic,
@@ -99,30 +80,29 @@ if generate:
 
         st.success("Story generated successfully!")
 
-        # Cover Image
         if result.get("image_file"):
 
-            st.subheader("🖼️ Story Cover")
+            st.subheader("🖼️ AI Generated Cover")
 
-            col1, col2, col3 = st.columns([1, 2, 1])
+            st.image(
+                result["image_file"],
+                use_container_width=True
+            )
 
-            with col2:
-                st.image(
-                    result["image_file"],
-                    width=350
-                )
+        st.subheader("📖 Story")
 
-        # Story
-        st.subheader("📖 Generated Story")
         st.write(result["story"])
 
-        # Audio
         if result.get("audio_file"):
 
-            with open(result["audio_file"], "rb") as audio_file:
+            with open(
+                result["audio_file"],
+                "rb"
+            ) as audio_file:
+
                 audio_bytes = audio_file.read()
 
-            st.subheader("🎧 Audio Narration")
+            st.subheader("🎧 Narration")
 
             st.audio(
                 audio_bytes,
@@ -137,8 +117,11 @@ if generate:
             )
 
     else:
-        st.warning("Please enter a story topic.")
+
+        st.warning(
+            "Please enter a story topic."
+        )
 
 st.divider()
 
-st.caption("Built with ❤️ by The Rising Icons")
+st.caption("Built by The Rising Icons")
