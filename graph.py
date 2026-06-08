@@ -85,41 +85,65 @@ Requirements:
 
 def generate_cover_image(state):
 
-    width = 1024
-    height = 1024
+    width = 800
+    height = 1000
 
     image = Image.new(
         "RGB",
         (width, height),
-        color=(20, 30, 60)
+        color=(15, 23, 42)
     )
 
     draw = ImageDraw.Draw(image)
 
+    # Top banner
     draw.rectangle(
-        [(40, 40), (984, 984)],
-        outline=(255, 215, 0),
-        width=5
+        [(0, 0), (width, 120)],
+        fill=(37, 99, 235)
     )
 
-    title = state["topic"]
-    category = state["category"]
+    # Category banner
+    draw.rectangle(
+        [(150, 350), (650, 430)],
+        fill=(245, 158, 11)
+    )
+
+    # Bottom banner
+    draw.rectangle(
+        [(0, 900), (width, 1000)],
+        fill=(37, 99, 235)
+    )
+
+    title = state["topic"].upper()
+    category = state["category"].upper()
 
     draw.text(
-        (80, 180),
+        (180, 40),
+        "THE RISING ICONS",
+        fill="white"
+    )
+
+    draw.text(
+        (80, 220),
         title,
         fill="white"
     )
 
     draw.text(
-        (80, 350),
-        f"{category} Story",
+        (220, 375),
+        f"{category} STORY",
+        fill="black"
+    )
+
+    draw.text(
+        (150, 600),
+        "Inspiration • Growth • Success",
         fill=(255, 215, 0)
     )
 
     draw.text(
-        (80, 800),
-        "The Rising Icons",
+        (220, 940),
+        "AI STORY NARRATOR",
         fill="white"
     )
 
@@ -131,7 +155,6 @@ def generate_cover_image(state):
         **state,
         "image_file": image_path
     }
-
 
 def generate_audio(state):
 
