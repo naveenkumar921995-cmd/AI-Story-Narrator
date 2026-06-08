@@ -1,3 +1,21 @@
+from huggingface_hub import InferenceClient
+import streamlit as st
+
+client = InferenceClient(
+    api_key=st.secrets["HF_TOKEN"]
+)
+
+try:
+    image = client.text_to_image(
+        "A professional portrait of a successful entrepreneur, cinematic lighting",
+        model="black-forest-labs/FLUX.1-schnell"
+    )
+
+    image.save("test_image.png")
+    st.image("test_image.png")
+
+except Exception as e:
+    st.error(str(e))
 import streamlit as st
 from graph import run_story_narrator
 
