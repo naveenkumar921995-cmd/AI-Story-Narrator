@@ -2,45 +2,107 @@ import streamlit as st
 from graph import run_story_narrator
 
 st.set_page_config(
-    page_title="AI Story Narrator",
+    page_title="AI Story Narrator V2",
     page_icon="🎙️",
-    layout="centered"
+    layout="wide"
 )
 
-st.title("🎙️ AI Story Narrator")
-st.write("Generate AI stories and listen to them as audio.")
+if "history" not in st.session_state:
+    st.session_state.history = []
+
+st.title("🎙️ AI Story Narrator V2")
+st.caption("Create stories and listen to AI narration")
+
+with st.sidebar:
+
+    st.header("⚙️ Story Settings")
+
+    category = st.selectbox(
+        "Story Category",
+        [
+            "Entrepreneur",
+            "Motivational",
+            "Adventure",
+            "Fantasy",
+            "Sci-Fi",
+            "Historical",
+            "Kids Story"
+        ]
+    )
+
+    length = st.selectbox(
+        "Story Length",
+        [
+            "Short",
+            "Medium",
+            "Long"
+        ]
+    )
+
+    language = st.selectbox(
+        "Narration Language",
+        [
+            "English",
+            "Hindi"
+        ]
+    )
+
+    st.divider()
+
+    st.header("📚 Story History")
+
+    if len(st.session_state.history) == 0:
+        st.write("No stories generated yet")
+
+    for item in reversed(st.session_state.history[-5:]):
+        st.write("• " + item)
 
 topic = st.text_input(
-    "Enter a story topic",
+    "Enter Story Topic",
     placeholder="A boy who started a billion-dollar company"
 )
 
-if st.button("Generate Story & Audio"):
+generate = st.button("Generate Story & Audio")
+
+if generate:
 
     if topic:
 
-        with st.spinner("Generating story and audio..."):
+        with st.spinner("Generating..."):
 
-            result = run_story_narrator(topic)
+            result = run_story_narrator(
+                topic,
+                category,
+                length,
+                language
+            )
 
-            st.subheader("Generated Story")
-            st.write(result["story"])
+        st.session_state.history.append(topic)
 
-            if result["audio_file"]:
+        st.success("Story generated successfully")
 
-                st.subheader("Audio Narration")
+        st.subheader("📖 Generated Story")
 
-                with open(result["audio_file"], "rb") as audio_file:
-                    audio_bytes = audio_file.read()
+        st.write(result["story"])
 
-                st.audio(audio_bytes, format="audio/mp3")
+        with open(result["audio_file"], "rb") as audio_file:
 
-                st.download_button(
-                    label="Download Audio",
-                    data=audio_bytes,
-                    file_name="story.mp3",
-                    mime="audio/mpeg"
-                )
+            audio_bytes = audio_file.read()
+
+        st.subheader("🎧 Audio Narration")
+
+        st.audio(
+            audio_bytes,
+            format="audio/mp3"
+        )
+
+        st.download_button(
+            label="⬇️ Download Audio",
+            data=audio_bytes,
+            file_name="story.mp3",
+            mime="audio/mpeg"
+        )
 
     else:
-        st.warning("Please enter a topic.")
+
+        st.warning("Please enter a story topic.")
