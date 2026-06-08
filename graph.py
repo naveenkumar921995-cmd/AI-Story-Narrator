@@ -13,18 +13,37 @@ client = InferenceClient(
 
 class StoryState(TypedDict):
     topic: str
+    category: str
+    length: str
+    language: str
     story: str
     audio_file: str
 
 
 def generate_story(state):
 
+    length_map = {
+        "Short": 150,
+        "Medium": 300,
+        "Long": 600
+    }
+
+    words = length_map[state["length"]]
+
     prompt = f"""
-Write an engaging short story in about 250 words on:
-{state['topic']}
+Write a {state['category']} story.
+
+Topic: {state['topic']}
+
+Requirements:
+- Length: approximately {words} words
+- Make it engaging
+- Include a clear beginning, challenge, and ending
+- Use simple language
 """
 
     try:
+
         response = client.chat.completions.create(
             model="meta-llama/Llama-3.1-8B-Instruct",
             messages=[
@@ -33,13 +52,14 @@ Write an engaging short story in about 250 words on:
                     "content": prompt
                 }
             ],
-            max_tokens=400
+            max_tokens=1000
         )
 
         story = response.choices[0].message.content
 
     except Exception as e:
-        story = f"Error from Hugging Face: {str(e)}"
+
+        story = f"Error generating story: {str(e)}"
 
     return {
         **state,
@@ -49,11 +69,16 @@ Write an engaging short story in about 250 words on:
 
 def generate_audio(state):
 
+    lang_code = "en"
+
+    if state["language"] == "Hindi":
+        lang_code = "hi"
+
     output_file = "story.mp3"
 
     tts = gTTS(
         text=state["story"],
-        lang="en",
+        lang=lang_code,
         slow=False
     )
 
@@ -78,10 +103,13 @@ builder.add_edge("generate_audio", END)
 graph = builder.compile()
 
 
-def run_story_narrator(topic):
+def run_story_narrator(topic, category, length, language):
 
     return graph.invoke(
         {
-            "topic": topic
+            "topic": topic,
+            "category": category,
+            "length": length,
+            "language": language
         }
     )
