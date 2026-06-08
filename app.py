@@ -1,4 +1,8 @@
 import streamlit as st
+import huggingface_hub
+
+st.write("Hugging Face Hub Version:")
+st.write(huggingface_hub.__version__)
 from graph import run_story_narrator
 
 st.set_page_config(
